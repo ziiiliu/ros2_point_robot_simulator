@@ -4,7 +4,7 @@ package_name = 'simulated_robots'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='0.0.1',
     packages=[package_name],
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -13,13 +13,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='jan',
-    maintainer_email='jan@todo.todo',
-    description='TODO: Package description',
+    maintainer='jblumenkamp',
+    maintainer_email='jb2270@cam.ac.uk',
+    description='A collection of different simulated robots',
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'robot = simulated_robots.simple_turtlebot:main',
         ],
     },
 )
