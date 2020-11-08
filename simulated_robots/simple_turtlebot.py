@@ -1,73 +1,22 @@
 import rclpy
-from rclpy.node import Node
-
-from geometry_msgs.msg import Twist, Pose, PoseStamped
-from scipy.spatial.transform import Rotation as R
-import numpy as np
 import re
 
-class Turtlebot():
-    def __init__(self):
-        self.orientation = R.from_euler('z', [0], degrees=True).as_quat()[0]
-        self.position = np.zeros(2) # x/y
+import numpy as np
 
-    def step(self, dt, velocity):
-        # dt: time step
-        # velocity: dict of linear, angular of np arrays of shape (3,) xyz each
+from rclpy.node import Node
+from .holonomic_robot import HolonomicRobotROS
 
-        own_r = R.from_quat(self.orientation)
-        dp = own_r.apply(velocity['linear']*dt)
-        self.position += dp[:2]
-
-        r = velocity['angular']
-        vel_r = R.from_euler('xyz', velocity['angular']*dt)
-        self.orientation = (own_r*vel_r).as_quat()
-
-class TurtlebotROS(Turtlebot):
+class TurtlebotROS(HolonomicRobotROS):
     def __init__(self, uuid, node):
-        Turtlebot.__init__(self)
-
-        self.node = node
-        self.uuid = uuid
-        self.orientation_offset = R.from_euler('z', -270, degrees=True)
-        self.ros_velocity = Twist()
-
-        self.pose_publisher = self.node.create_publisher(PoseStamped, f'/motion_capture_server/rigid_bodies/{self.uuid}/pose', 1)
-
-        self.velocity_subscription = self.node.create_subscription(
-            Twist,
-            f'/{self.uuid}/cmd_vel',
-            self.velocity_callback,
-            1)
-
-    def velocity_callback(self, vel):
-        self.ros_velocity = vel
+        super().__init__(uuid, node)
 
     def step(self, dt):
-        v = self.ros_velocity.linear
-        v_lin = np.array([v.x, 0, 0])
-        r = self.ros_velocity.angular
-        v_ang = np.array([0, 0, r.z])
-        super().step(dt, {'linear': v_lin, 'angular': v_ang})
-
-        msg = PoseStamped()
-
-        msg.pose.position.x = self.position[0]
-        msg.pose.position.y = self.position[1]
-
-        # This offset is inversing the mocap_offset in tb_control action_server
-        orientation = (R.from_quat(self.orientation.copy())*self.orientation_offset).as_quat()
-        msg.pose.orientation.x = orientation[0]
-        msg.pose.orientation.y = orientation[1]
-        msg.pose.orientation.z = orientation[2]
-        msg.pose.orientation.w = orientation[3]
-
-        msg.header.frame_id = "mocap"
-
-        self.pose_publisher.publish(msg)
+        super().step(dt, {
+            'linear': np.array([self.velocity.linear.x, 0, 0]),
+            'angular': np.array([0, 0, self.velocity.angular.z])
+        })
 
 class SimpleTurtlebot(Node):
-
     def __init__(self):
         super().__init__('simple_turtlebot')
         self.uuid_regex = re.compile('/turtlebot_\d+/')
@@ -92,23 +41,17 @@ class SimpleTurtlebot(Node):
         for agent_key in self.get_all_agents():
             if agent_key not in self.agents.keys():
                 self.agents[agent_key] = TurtlebotROS(agent_key, self)
-                print(f"discovered {agent_key}")
 
     def step_all_agents(self):
         for agent in self.agents.values():
             agent.step(self.timer_period)
+            agent.publish_pose()
 
 
 def main(args=None):
     rclpy.init(args=args)
-
     publisher = SimpleTurtlebot()
-
     rclpy.spin(publisher)
-
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
     publisher.destroy_node()
     rclpy.shutdown()
 
