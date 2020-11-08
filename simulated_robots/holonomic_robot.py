@@ -5,18 +5,15 @@ from scipy.spatial.transform import Rotation as R
 
 class HolonomicRobot():
     def __init__(self):
-        self.orientation = R.from_euler('z', 0, degrees=True).as_quat()
+        self.orientation = R.from_euler('z', 0, degrees=True)
         self.position = np.zeros(3) # x/y/z
 
     def step(self, dt, velocity):
         # dt: time step
         # velocity: dict of linear, angular of np arrays of shape (3,) xyz each
 
-        own_r = R.from_quat(self.orientation)
-        self.position += own_r.apply(velocity['linear']*dt)
-
-        vel_r = R.from_euler('xyz', velocity['angular']*dt)
-        self.orientation = (own_r*vel_r).as_quat()
+        self.position += self.orientation.apply(velocity['linear']*dt)
+        self.orientation *= R.from_euler('xyz', velocity['angular']*dt)
 
 class HolonomicRobotROS(HolonomicRobot):
     def __init__(self, uuid, node):
@@ -46,7 +43,7 @@ class HolonomicRobotROS(HolonomicRobot):
         msg.pose.position.z = self.position[2]
 
         # This offset is inversing the mocap_offset in tb_control action_server
-        orientation = (R.from_quat(self.orientation.copy())*self.orientation_offset).as_quat()
+        orientation = (self.orientation * self.orientation_offset).as_quat()
         msg.pose.orientation.x = orientation[0]
         msg.pose.orientation.y = orientation[1]
         msg.pose.orientation.z = orientation[2]
