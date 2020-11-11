@@ -50,6 +50,7 @@ class HolonomicRobotROS(HolonomicRobot):
         msg.pose.orientation.w = orientation[3]
 
         msg.header.frame_id = "mocap"
+        msg.header.stamp = self.node.get_clock().now().to_msg()
 
         self.pose_publisher.publish(msg)
 
