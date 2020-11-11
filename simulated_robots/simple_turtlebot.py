@@ -46,6 +46,7 @@ class SimpleTurtlebot(Node):
         for agent in self.agents.values():
             agent.step(self.timer_period)
             agent.publish_pose()
+            agent.publish_tf()
 
 
 def main(args=None):

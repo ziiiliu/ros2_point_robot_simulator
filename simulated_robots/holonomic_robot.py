@@ -1,7 +1,8 @@
 import numpy as np
 
-from geometry_msgs.msg import Twist, PoseStamped
+from geometry_msgs.msg import Twist, PoseStamped, TransformStamped
 from scipy.spatial.transform import Rotation as R
+from tf2_ros.transform_broadcaster import TransformBroadcaster
 
 class HolonomicRobot():
     def __init__(self):
@@ -25,6 +26,7 @@ class HolonomicRobotROS(HolonomicRobot):
         self.velocity = Twist()
 
         self.pose_publisher = self.node.create_publisher(PoseStamped, f'/motion_capture_server/rigid_bodies/{self.uuid}/pose', 1)
+        self.tf_publisher = TransformBroadcaster(node=self.node)
 
         self.velocity_subscription = self.node.create_subscription(
             Twist,
@@ -54,3 +56,22 @@ class HolonomicRobotROS(HolonomicRobot):
 
         self.pose_publisher.publish(msg)
 
+    def publish_tf(self):
+        '''Broadcast the goal as a tf for visualization'''
+        tf = TransformStamped()
+        tf.header.frame_id = 'mocap'
+        tf.header.stamp = self.node.get_clock().now().to_msg()
+        tf.child_frame_id = f'{self.uuid}'
+        
+        tf.transform.translation.x = float(self.position[0])
+        tf.transform.translation.y = float(self.position[1])
+        tf.transform.translation.z = float(self.position[2])
+        # This offset is inversing the mocap_offset in tb_control action_server
+        orientation = (self.orientation * self.orientation_offset).as_quat()
+
+        tf.transform.rotation.x = orientation[0]
+        tf.transform.rotation.y = orientation[1]
+        tf.transform.rotation.z = orientation[2]
+        tf.transform.rotation.w = orientation[3]
+
+        self.tf_publisher.sendTransform(tf)
