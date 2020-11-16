@@ -9,7 +9,7 @@ Panels:
         - /TF1
         - /TF1/Frames1
       Splitter Ratio: 0.5
-    Tree Height: 761
+    Tree Height: 190
   - Class: rviz_common/Selection
     Name: Selection
   - Class: rviz_common/Tool Properties
@@ -44,63 +44,6 @@ Visualization Manager:
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
       Value: true
-    - Alpha: 1
-      Axes Length: 0.20000000298023224
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /motion_capture_server/rigid_bodies/turtlebot_0/pose
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.20000000298023224
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /motion_capture_server/rigid_bodies/turtlebot_1/pose
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.20000000298023224
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /motion_capture_server/rigid_bodies/turtlebot_2/pose
-      Value: true
     - Class: rviz_default_plugins/TF
       Enabled: true
       Frame Timeout: 15
@@ -108,24 +51,44 @@ Visualization Manager:
         All Enabled: false
         mocap:
           Value: false
+        turtlebot_0:
+          Value: true
         turtlebot_0_goalpose:
+          Value: true
+        turtlebot_1:
           Value: true
         turtlebot_1_goalpose:
           Value: true
-        turtlebot_2_goalpose:
+        turtlebot_2:
+          Value: true
+        turtlebot_3:
+          Value: true
+        turtlebot_3_goalpose:
+          Value: true
+        turtlebot_4:
           Value: true
       Marker Scale: 1
       Name: TF
       Show Arrows: true
       Show Axes: true
-      Show Names: false
+      Show Names: true
       Tree:
         mocap:
+          turtlebot_0:
+            {}
           turtlebot_0_goalpose:
+            {}
+          turtlebot_1:
             {}
           turtlebot_1_goalpose:
             {}
-          turtlebot_2_goalpose:
+          turtlebot_2:
+            {}
+          turtlebot_3:
+            {}
+          turtlebot_3_goalpose:
+            {}
+          turtlebot_4:
             {}
       Update Interval: 0
       Value: true
@@ -191,19 +154,40 @@ Visualization Manager:
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
       Yaw: 1.195397973060608
-    Saved: ~
+    Saved:
+      - Class: rviz_default_plugins/Orbit
+        Distance: 8.757803916931152
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.05999999865889549
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Focal Point:
+          X: 0
+          Y: 0
+          Z: 0
+        Focal Shape Fixed Size: true
+        Focal Shape Size: 0.05000000074505806
+        Invert Z Axis: false
+        Name: Orbit
+        Near Clip Distance: 0.009999999776482582
+        Pitch: 0.7253977656364441
+        Target Frame: <Fixed Frame>
+        Value: Orbit (rviz)
+        Yaw: 1.195397973060608
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 1025
+  Height: 1016
   Hide Left Dock: false
   Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000100000000000001cb0000039efc0200000004fb000000100044006900730070006c006100790073010000003d0000015b000000c900fffffffb0000001200530065006c0065006300740069006f006e010000019e000000a80000005c00fffffffb0000001e0054006f006f006c002000500072006f0070006500720074006900650073010000024c000000a80000005c00fffffffb0000000a0056006900650077007301000002fa000000e1000000a400ffffff000005670000039e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1920
-  X: 0
+  Width: 1848
+  X: 72
   Y: 27
