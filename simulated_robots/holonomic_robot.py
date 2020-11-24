@@ -4,17 +4,19 @@ from geometry_msgs.msg import Twist, PoseStamped, TransformStamped
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 
-class HolonomicRobot():
+
+class HolonomicRobot:
     def __init__(self):
-        self.orientation = R.from_euler('z', 0, degrees=True)
-        self.position = np.zeros(3) # x/y/z
+        self.orientation = R.from_euler("z", 0, degrees=True)
+        self.position = np.zeros(3)  # x/y/z
 
     def step(self, dt, velocity):
         # dt: time step
         # velocity: dict of linear, angular of np arrays of shape (3,) xyz each
 
-        self.position += self.orientation.apply(velocity['linear']*dt)
-        self.orientation *= R.from_euler('xyz', velocity['angular']*dt)
+        self.position += self.orientation.apply(velocity["linear"] * dt)
+        self.orientation *= R.from_euler("xyz", velocity["angular"] * dt)
+
 
 class HolonomicRobotROS(HolonomicRobot):
     def __init__(self, uuid, node):
@@ -22,17 +24,17 @@ class HolonomicRobotROS(HolonomicRobot):
 
         self.node = node
         self.uuid = uuid
-        self.orientation_offset = R.from_euler('z', -270, degrees=True)
+        self.orientation_offset = R.from_euler("z", -270, degrees=True)
         self.velocity = Twist()
 
-        self.pose_publisher = self.node.create_publisher(PoseStamped, f'/motion_capture_server/rigid_bodies/{self.uuid}/pose', 1)
+        self.pose_publisher = self.node.create_publisher(
+            PoseStamped, f"/motion_capture_server/rigid_bodies/{self.uuid}/pose", 1
+        )
         self.tf_publisher = TransformBroadcaster(node=self.node)
 
         self.velocity_subscription = self.node.create_subscription(
-            Twist,
-            f'/{self.uuid}/cmd_vel',
-            self.velocity_callback,
-            1)
+            Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
+        )
 
     def velocity_callback(self, vel):
         self.velocity = vel
@@ -57,12 +59,12 @@ class HolonomicRobotROS(HolonomicRobot):
         self.pose_publisher.publish(msg)
 
     def publish_tf(self):
-        '''Broadcast the goal as a tf for visualization'''
+        """Broadcast the goal as a tf for visualization"""
         tf = TransformStamped()
-        tf.header.frame_id = 'mocap'
+        tf.header.frame_id = "mocap"
         tf.header.stamp = self.node.get_clock().now().to_msg()
-        tf.child_frame_id = f'{self.uuid}'
-        
+        tf.child_frame_id = f"{self.uuid}"
+
         tf.transform.translation.x = float(self.position[0])
         tf.transform.translation.y = float(self.position[1])
         tf.transform.translation.z = float(self.position[2])
