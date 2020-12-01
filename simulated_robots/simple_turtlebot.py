@@ -24,9 +24,9 @@ class TurtlebotROS(HolonomicRobotROS):
 class SimpleTurtlebot(Node):
     def __init__(self):
         super().__init__("simple_turtlebot")
-        self.uuid_regex = re.compile("/turtlebot_\d+/")
+        self.uuid_regex = re.compile(r"/turtlebot_\d+/")
         self.agents = {}
-        self.timer_period = 1 / 120  # seconds
+        self.timer_period = 1 / 10  # seconds
         self.pose_publisher_timer = self.create_timer(
             self.timer_period, self.step_all_agents
         )  # 120 Hz
