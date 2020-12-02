@@ -4,10 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
-        - /Global Options1
-        - /Status1
         - /TF1
         - /TF1/Frames1
+        - /GridCells1
+        - /Polygon1
       Splitter Ratio: 0.5
     Tree Height: 190
   - Class: rviz_common/Selection
@@ -61,11 +61,15 @@ Visualization Manager:
           Value: true
         turtlebot_2:
           Value: true
+        turtlebot_2_goalpose:
+          Value: true
         turtlebot_3:
           Value: true
         turtlebot_3_goalpose:
           Value: true
         turtlebot_4:
+          Value: true
+        turtlebot_4_goalpose:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -84,13 +88,41 @@ Visualization Manager:
             {}
           turtlebot_2:
             {}
+          turtlebot_2_goalpose:
+            {}
           turtlebot_3:
             {}
           turtlebot_3_goalpose:
             {}
           turtlebot_4:
             {}
+          turtlebot_4_goalpose:
+            {}
       Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/GridCells
+      Color: 255; 100; 0
+      Enabled: true
+      Name: GridCells
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /obstacles
+      Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/Polygon
+      Color: 25; 255; 0
+      Enabled: true
+      Name: Polygon
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /border
       Value: true
   Enabled: true
   Global Options:
@@ -150,10 +182,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7253977656364441
+      Pitch: 0.7703976035118103
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.195397973060608
+      Yaw: 0.3003987669944763
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 8.757803916931152
