@@ -5,6 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /TF1
+        - /TF1/Status1
         - /TF1/Frames1
         - /GridCells1
         - /Polygon1
@@ -49,27 +50,31 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        base_footprint:
+          Value: false
+        base_link:
+          Value: false
+        base_scan:
+          Value: false
+        caster_back_link:
+          Value: false
+        imu_link:
+          Value: false
         mocap:
+          Value: false
+        odom:
+          Value: false
+        smartyflie_01:
           Value: false
         turtlebot_0:
           Value: true
-        turtlebot_0_goalpose:
-          Value: true
         turtlebot_1:
           Value: true
-        turtlebot_1_goalpose:
+        turtlebot_12:
           Value: true
         turtlebot_2:
           Value: true
-        turtlebot_2_goalpose:
-          Value: true
-        turtlebot_3:
-          Value: true
-        turtlebot_3_goalpose:
-          Value: true
-        turtlebot_4:
-          Value: true
-        turtlebot_4_goalpose:
+        turtlebot_7:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -78,25 +83,17 @@ Visualization Manager:
       Show Names: true
       Tree:
         mocap:
-          turtlebot_0:
+          smartyflie_01:
             {}
-          turtlebot_0_goalpose:
+          turtlebot_0:
             {}
           turtlebot_1:
             {}
-          turtlebot_1_goalpose:
+          turtlebot_12:
             {}
           turtlebot_2:
             {}
-          turtlebot_2_goalpose:
-            {}
-          turtlebot_3:
-            {}
-          turtlebot_3_goalpose:
-            {}
-          turtlebot_4:
-            {}
-          turtlebot_4_goalpose:
+          turtlebot_7:
             {}
       Update Interval: 0
       Value: true
