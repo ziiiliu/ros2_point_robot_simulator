@@ -8,7 +8,6 @@ Panels:
         - /TF1/Frames1
         - /GridCells1
         - /Polygon1
-        - /Pose4
       Splitter Ratio: 0.5
     Tree Height: 298
   - Class: rviz_common/Selection
@@ -54,19 +53,13 @@ Visualization Manager:
           Value: false
         turtlebot_0:
           Value: true
-        turtlebot_0_goalpose:
-          Value: true
         turtlebot_1:
-          Value: true
-        turtlebot_1_goalpose:
           Value: true
         turtlebot_2:
           Value: true
-        turtlebot_2_goalpose:
-          Value: true
         turtlebot_3:
           Value: true
-        turtlebot_3_goalpose:
+        turtlebot_4:
           Value: true
       Marker Scale: 1
       Name: TF
@@ -77,19 +70,13 @@ Visualization Manager:
         mocap:
           turtlebot_0:
             {}
-          turtlebot_0_goalpose:
-            {}
           turtlebot_1:
-            {}
-          turtlebot_1_goalpose:
             {}
           turtlebot_2:
             {}
-          turtlebot_2_goalpose:
-            {}
           turtlebot_3:
             {}
-          turtlebot_3_goalpose:
+          turtlebot_4:
             {}
       Update Interval: 0
       Value: true
@@ -116,82 +103,6 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /border
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.15000000596046448
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /turtlebot_0/goal_pose
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.15000000596046448
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /turtlebot_1/goal_pose
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.15000000596046448
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /turtlebot_2/goal_pose
-      Value: true
-    - Alpha: 1
-      Axes Length: 0.15000000596046448
-      Axes Radius: 0.05000000074505806
-      Class: rviz_default_plugins/Pose
-      Color: 255; 25; 0
-      Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
-      Name: Pose
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
-      Shape: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /turtlebot_3/goal_pose
       Value: true
   Enabled: true
   Global Options:
@@ -282,7 +193,7 @@ Window Geometry:
   Height: 1024
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000001cb0000039cfc0200000004fb000000100044006900730070006c0061007900730100000043000001d40000010400fffffffb0000001200530065006c0065006300740069006f006e010000021b0000007a0000007a00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007301000002990000007a0000007a00fffffffb0000000a005600690065007700730100000317000000c8000000c800ffffff000005b10000039c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd00000001000000000000025a0000039cfc0200000004fb000000100044006900730070006c0061007900730100000043000001d40000010400fffffffb0000001200530065006c0065006300740069006f006e010000021b0000007a0000007a00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007301000002990000007a0000007a00fffffffb0000000a005600690065007700730100000317000000c8000000c800ffffff000005220000039c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Tool Properties:
