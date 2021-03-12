@@ -18,7 +18,7 @@ class RoboMaster(SimulatedRobotBase):
             np.array(
                 [
                     np.clip(self.velocity.linear.x, -2.5, 3.5),
-                    np.clip(self.velocity.linear.x, -2.8, 2.8),
+                    np.clip(self.velocity.linear.y, -2.8, 2.8),
                     0,
                 ]
             )
