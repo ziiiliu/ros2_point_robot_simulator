@@ -5,26 +5,16 @@ from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 
 
-class HolonomicRobot:
-    def __init__(self):
-        self.orientation = R.from_euler("z", 0, degrees=True)
-        self.position = np.zeros(3)  # x/y/z
-
-    def step(self, dt, velocity):
-        # dt: time step
-        # velocity: dict of linear, angular of np arrays of shape (3,) xyz each
-
-        self.position += self.orientation.apply(velocity["linear"] * dt)
-        self.orientation *= R.from_euler("xyz", velocity["angular"] * dt)
-
-
-class HolonomicRobotROS(HolonomicRobot):
+class SimulatedRobotBase:
     def __init__(self, uuid, node):
         super().__init__()
 
+        self.orientation = R.from_euler("xyz", [0, 0, 0])
+        self.position = np.zeros(3)  # x/y/z
+
         self.node = node
         self.uuid = uuid
-        self.orientation_offset = R.from_euler("z", -270, degrees=True)
+        self.orientation_offset = R.from_euler("xyz", [0, 0, -270], degrees=True)
         self.velocity = Twist()
 
         self.pose_publisher = self.node.create_publisher(
@@ -35,6 +25,10 @@ class HolonomicRobotROS(HolonomicRobot):
         self.velocity_subscription = self.node.create_subscription(
             Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
         )
+
+    def step(self, dt):
+        # dt: time step
+        raise NotImplementedError()
 
     def velocity_callback(self, vel):
         self.velocity = vel
