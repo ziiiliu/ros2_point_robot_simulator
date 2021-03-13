@@ -14,7 +14,7 @@ class SimulatedRobotBase:
 
         self.node = node
         self.uuid = uuid
-        self.orientation_offset = R.from_euler("xyz", [0, 0, -270], degrees=True)
+        self.orientation_offset = R.from_euler("z", -3 * np.pi / 2)
         self.velocity = Twist()
 
         self.pose_publisher = self.node.create_publisher(
@@ -26,12 +26,18 @@ class SimulatedRobotBase:
             Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
         )
 
+        self.watchdog = self.node.create_timer(1 / 5, self.watchdog)
+
     def step(self, dt):
         # dt: time step
         raise NotImplementedError()
 
     def velocity_callback(self, vel):
+        self.watchdog.reset()
         self.velocity = vel
+
+    def watchdog(self):
+        self.velocity = Twist()
 
     def publish_pose(self):
         msg = PoseStamped()
