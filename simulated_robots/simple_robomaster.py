@@ -12,13 +12,14 @@ from .simple_simulator import SimpleSimulator
 class RoboMaster(SimulatedRobotBase):
     def __init__(self, uuid, node):
         super().__init__(uuid, node)
+        self.orientation_offset = R.from_euler("xyz", [0, 0, np.pi / 2])
 
     def step(self, dt):
         self.position += self.orientation.apply(
             np.array(
                 [
                     np.clip(self.velocity.linear.x, -2.5, 3.5),
-                    np.clip(self.velocity.linear.y, -2.8, 2.8),
+                    -np.clip(self.velocity.linear.y, -2.8, 2.8),
                     0,
                 ]
             )
@@ -26,7 +27,7 @@ class RoboMaster(SimulatedRobotBase):
         )
         self.orientation *= R.from_euler(
             "xyz",
-            np.array([0, 0, np.clip(self.velocity.angular.z, -10.5, 10.5)]) * dt,
+            np.array([0, 0, np.clip(-self.velocity.angular.z, -10.5, 10.5)]) * dt,
         )
 
 
