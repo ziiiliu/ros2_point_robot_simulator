@@ -27,7 +27,7 @@ class RoboMaster(SimulatedRobotBase):
         )
         self.orientation *= R.from_euler(
             "xyz",
-            np.array([0, 0, np.clip(-self.velocity.angular.z, -10.5, 10.5)]) * dt,
+            np.array([0, 0, np.clip(self.velocity.angular.z, -10.5, 10.5)]) * dt,
         )
 
 
