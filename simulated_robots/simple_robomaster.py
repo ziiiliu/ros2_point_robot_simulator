@@ -12,7 +12,7 @@ from .simple_simulator import SimpleSimulator
 class RoboMaster(SimulatedRobotBase):
     def __init__(self, uuid, node):
         super().__init__(uuid, node)
-        self.orientation_offset = R.from_euler("xyz", [0, 0, 0])
+        self.orientation_offset = R.from_euler("xyz", [0, 0, 0.0])
 
     def step(self, dt):
         self.position += self.orientation.apply(
