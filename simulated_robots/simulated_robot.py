@@ -1,11 +1,13 @@
 import numpy as np
 
-from geometry_msgs.msg import Twist, PoseStamped, TransformStamped
+from geometry_msgs.msg import PoseStamped, TransformStamped
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 
 
 class SimulatedRobotBase:
+    WATCHDOG_FREQUENCY_HZ = 5
+
     def __init__(self, uuid, node):
         super().__init__()
 
@@ -14,30 +16,30 @@ class SimulatedRobotBase:
 
         self.node = node
         self.uuid = uuid
-        self.orientation_offset = R.from_euler("z", -3 * np.pi / 2)
-        self.velocity = Twist()
+        self.orientation_offset = R.from_euler("z", 0)
 
         self.pose_publisher = self.node.create_publisher(
             PoseStamped, f"/motion_capture_server/rigid_bodies/{self.uuid}/pose", 1
         )
         self.tf_publisher = TransformBroadcaster(node=self.node)
 
-        self.velocity_subscription = self.node.create_subscription(
-            Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
-        )
+        self.watchdog = None
 
-        self.watchdog = self.node.create_timer(1 / 5, self.watchdog)
+    def reset_watchdog(self):
+        # Reset the watchdog. The watchdog only starts running after it was reset once.
+        if self.watchdog is None:
+            self.watchdog = self.node.create_timer(
+                1 / self.WATCHDOG_FREQUENCY_HZ, self.stop
+            )
+        self.watchdog.reset()
 
     def step(self, dt):
         # dt: time step
         raise NotImplementedError()
 
-    def velocity_callback(self, vel):
-        self.watchdog.reset()
-        self.velocity = vel
-
-    def watchdog(self):
-        self.velocity = Twist()
+    def stop(self):
+        # Called by watchdog if wasn't reset in time
+        raise NotImplementedError()
 
     def publish_pose(self):
         msg = PoseStamped()

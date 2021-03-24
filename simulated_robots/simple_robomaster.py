@@ -1,25 +1,47 @@
 import rclpy
-import re
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from rclpy.node import Node
+from geometry_msgs.msg import Twist
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
 
 
 class RoboMaster(SimulatedRobotBase):
+    MAX_V_LINEAR_X_M_S = 3.5
+    MAX_V_LINEAR_Y_M_S = 2.8
+    MAX_V_ROT_Z_RAD_S = 10.5
+
     def __init__(self, uuid, node):
         super().__init__(uuid, node)
-        self.orientation_offset = R.from_euler("xyz", [0, 0, 0.0])
+
+        self.velocity = Twist()
+        self.velocity_subscription = self.node.create_subscription(
+            Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
+        )
+
+    def velocity_callback(self, vel):
+        self.reset_watchdog()
+        self.velocity = vel
+
+    def stop(self):
+        self.velocity = Twist()
 
     def step(self, dt):
         self.position += self.orientation.apply(
             np.array(
                 [
-                    np.clip(self.velocity.linear.x, -2.5, 3.5),
-                    -np.clip(self.velocity.linear.y, -2.8, 2.8),
+                    np.clip(
+                        self.velocity.linear.x,
+                        -self.MAX_V_LINEAR_X_M_S,
+                        self.MAX_V_LINEAR_X_M_S,
+                    ),
+                    -np.clip(
+                        self.velocity.linear.y,
+                        -self.MAX_V_LINEAR_Y_M_S,
+                        self.MAX_V_LINEAR_Y_M_S,
+                    ),
                     0,
                 ]
             )
@@ -27,7 +49,18 @@ class RoboMaster(SimulatedRobotBase):
         )
         self.orientation *= R.from_euler(
             "xyz",
-            np.array([0, 0, np.clip(-self.velocity.angular.z, -10.5, 10.5)]) * dt,
+            np.array(
+                [
+                    0,
+                    0,
+                    np.clip(
+                        -self.velocity.angular.z,
+                        -self.MAX_V_ROT_Z_RAD_S,
+                        self.MAX_V_ROT_Z_RAD_S,
+                    ),
+                ]
+            )
+            * dt,
         )
 
 
