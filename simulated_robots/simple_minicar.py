@@ -9,6 +9,10 @@ from .simple_simulator import SimpleSimulator
 
 
 class Minicar(SimulatedRobotBase):
+    CAR_LENGTH = 0.15  # m
+    MAX_V = 1.0  # m/s
+    MAX_STEER = np.pi / 10  # rad
+
     def __init__(self, uuid, node):
         super().__init__(uuid, node)
 
@@ -16,6 +20,7 @@ class Minicar(SimulatedRobotBase):
         self.control_subscription = self.node.create_subscription(
             MinicarControl, f"/{self.uuid}/cmd_vel", self.control_callback, 1
         )
+        self.orientation_offset = R.from_euler("z", np.pi / 2)
 
     def control_callback(self, ctrl: MinicarControl):
         self.reset_watchdog()
@@ -25,11 +30,12 @@ class Minicar(SimulatedRobotBase):
         self.control = MinicarControl()
 
     def step(self, dt):
-        v = np.clip(self.control.velocity, -0.2, 0.2)
-        s = np.clip(self.control.steering, -1.0, 1.0) * 0.3
-        self.position += self.orientation.apply(np.array([v, 0, 0]) * dt)
-        L = 0.15
-        self.orientation *= R.from_euler("z", np.tan(s) / L * v * dt)
+        v_clip = np.clip(self.control.velocity, 0.0, self.MAX_V)
+        steer_clip = np.clip(self.control.steering, -self.MAX_STEER, self.MAX_STEER)
+        self.position += self.orientation.apply(np.array([v_clip, 0, 0]) * dt)
+        self.orientation *= R.from_euler(
+            "z", np.tan(steer_clip) / self.CAR_LENGTH * v_clip * dt
+        )
 
 
 def main(args=None):
