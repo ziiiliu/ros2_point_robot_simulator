@@ -22,6 +22,8 @@ setup(
             "robot = simulated_robots.simple_turtlebot:main",
             "robomaster = simulated_robots.simple_robomaster:main",
             "minicar = simulated_robots.simple_minicar:main",
+            "crazyflie = simulated_robots.simple_crazyflie:main",
+
         ],
     },
 )

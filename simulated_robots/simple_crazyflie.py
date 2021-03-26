@@ -5,21 +5,23 @@ import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 from rclpy.node import Node
+from ctrl_msgs.msg import CrazyflieControl
+
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
 
 
 class CrazyFlie(SimulatedRobotBase):
-    MAX_V_LINEAR_X_M_S = 3.5
-    MAX_V_LINEAR_Y_M_S = 2.8
-    MAX_V_ROT_Z_RAD_S = 10.5
+    MAX_V_LINEAR_X_M_S = 1.5
+    MAX_V_LINEAR_Y_M_S = 1.5
+    MAX_V_ROT_Z_RAD_S = 20.0
 
     def __init__(self, uuid, node):
         super().__init__(uuid, node)
 
-        self.velocity = RoboMasterControl()
+        self.velocity = CrazyflieControl()
         self.velocity_subscription = self.node.create_subscription(
-            RoboMasterControl, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
+            CrazyflieControl, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
         )
 
     def velocity_callback(self, vel):
@@ -27,7 +29,7 @@ class CrazyFlie(SimulatedRobotBase):
         self.velocity = vel
 
     def stop(self):
-        self.velocity = RoboMasterControl()
+        self.velocity = CrazyflieControl()
 
     def step(self, dt):
         self.position += self.orientation.apply(
@@ -43,7 +45,11 @@ class CrazyFlie(SimulatedRobotBase):
                         -self.MAX_V_LINEAR_Y_M_S,
                         self.MAX_V_LINEAR_Y_M_S,
                     ),
-                    0,
+                    -np.clip(
+                        self.velocity.vy,
+                        -self.MAX_V_LINEAR_Y_M_S,
+                        self.MAX_V_LINEAR_Y_M_S,
+                    ),
                 ]
             )
             * dt
