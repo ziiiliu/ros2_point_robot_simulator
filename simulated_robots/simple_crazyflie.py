@@ -34,28 +34,27 @@ class CrazyFlie(SimulatedRobotBase):
         self.velocity = CrazyflieControl()
 
     def step(self, dt):
-        self.position += self.orientation.apply(
-            np.array(
+
+        self.position += np.array(
                 [
                     np.clip(
                         self.velocity.vx,
                         -self.MAX_V_LINEAR_X_M_S,
                         self.MAX_V_LINEAR_X_M_S,
                     ),
-                    -np.clip(
+                    np.clip(
                         self.velocity.vy,
                         -self.MAX_V_LINEAR_Y_M_S,
                         self.MAX_V_LINEAR_Y_M_S,
                     ),
-                    -np.clip(
+                    np.clip(
                         self.velocity.vz,
                         -self.MAX_V_LINEAR_Z_M_S,
                         self.MAX_V_LINEAR_Z_M_S,
                     ),
                 ]
-            )
-            * dt
-        )
+            ) * dt
+
         self.orientation *= R.from_euler(
             "xyz",
             np.array(
