@@ -14,6 +14,8 @@ from .simple_simulator import SimpleSimulator
 class CrazyFlie(SimulatedRobotBase):
     MAX_V_LINEAR_X_M_S = 1.5
     MAX_V_LINEAR_Y_M_S = 1.5
+    MAX_V_LINEAR_Z_M_S = 1.0
+
     MAX_V_ROT_Z_RAD_S = 20.0
 
     def __init__(self, uuid, node):
@@ -46,9 +48,9 @@ class CrazyFlie(SimulatedRobotBase):
                         self.MAX_V_LINEAR_Y_M_S,
                     ),
                     -np.clip(
-                        self.velocity.vy,
-                        -self.MAX_V_LINEAR_Y_M_S,
-                        self.MAX_V_LINEAR_Y_M_S,
+                        self.velocity.vz,
+                        -self.MAX_V_LINEAR_Z_M_S,
+                        self.MAX_V_LINEAR_Z_M_S,
                     ),
                 ]
             )
