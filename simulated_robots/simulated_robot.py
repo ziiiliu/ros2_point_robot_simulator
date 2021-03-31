@@ -8,11 +8,13 @@ from tf2_ros.transform_broadcaster import TransformBroadcaster
 class SimulatedRobotBase:
     WATCHDOG_FREQUENCY_HZ = 5
 
-    def __init__(self, uuid, node):
+    def __init__(self, uuid, node, initial_position, initial_orientation):
         super().__init__()
+        assert len(initial_orientation) == 3
+        assert len(initial_position) == 3
 
-        self.orientation = R.from_euler("xyz", [0, 0, 0])
-        self.position = np.hstack([np.random.uniform(-1, 1, size=(2,)), [0]])  # x/y/z
+        self.orientation = R.from_euler("xyz", initial_orientation)
+        self.position = np.array(initial_position)
 
         self.node = node
         self.uuid = uuid

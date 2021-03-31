@@ -12,8 +12,8 @@ class Turtlebot(SimulatedRobotBase):
     MAX_LATERAL_V_M_S = 0.2
     MAX_ANGULAR_V_RAD_S = np.pi * 0.75
 
-    def __init__(self, uuid, node):
-        super().__init__(uuid, node)
+    def __init__(self, uuid, node, initial_position, initial_orientation):
+        super().__init__(uuid, node, initial_position, initial_orientation)
         self.orientation_offset = R.from_euler("z", -3 * np.pi / 2)
 
         self.velocity = Twist()

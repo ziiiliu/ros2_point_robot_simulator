@@ -13,8 +13,8 @@ class Minicar(SimulatedRobotBase):
     MAX_V = 1.0  # m/s
     MAX_STEER = np.pi / 10  # rad
 
-    def __init__(self, uuid, node):
-        super().__init__(uuid, node)
+    def __init__(self, uuid, node, initial_position, initial_orientation):
+        super().__init__(uuid, node, initial_position, initial_orientation)
 
         self.control = MinicarControl()
         self.control_subscription = self.node.create_subscription(

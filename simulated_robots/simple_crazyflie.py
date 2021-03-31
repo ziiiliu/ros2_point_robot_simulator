@@ -18,8 +18,8 @@ class CrazyFlie(SimulatedRobotBase):
 
     MAX_V_ROT_Z_RAD_S = 20.0
 
-    def __init__(self, uuid, node):
-        super().__init__(uuid, node)
+    def __init__(self, uuid, node, initial_position, initial_orientation):
+        super().__init__(uuid, node, initial_position, initial_orientation)
 
         self.velocity = CrazyflieControl()
         self.velocity_subscription = self.node.create_subscription(
@@ -35,7 +35,8 @@ class CrazyFlie(SimulatedRobotBase):
 
     def step(self, dt):
 
-        self.position += np.array(
+        self.position += (
+            np.array(
                 [
                     np.clip(
                         self.velocity.vx,
@@ -53,7 +54,9 @@ class CrazyFlie(SimulatedRobotBase):
                         self.MAX_V_LINEAR_Z_M_S,
                     ),
                 ]
-            ) * dt
+            )
+            * dt
+        )
 
         self.orientation *= R.from_euler(
             "xyz",
@@ -70,6 +73,7 @@ class CrazyFlie(SimulatedRobotBase):
             )
             * dt,
         )
+
 
 def main(args=None):
     rclpy.init(args=args)
