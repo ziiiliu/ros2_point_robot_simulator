@@ -51,9 +51,45 @@ Visualization Manager:
         minicar_0:
           Value: true
         minicar_0_goalpose:
+          Value: false
+        minicar_1:
           Value: true
+        minicar_1_goalpose:
+          Value: false
+        minicar_2:
+          Value: true
+        minicar_2_goalpose:
+          Value: false
+        minicar_3:
+          Value: true
+        minicar_3_goalpose:
+          Value: false
+        minicar_4:
+          Value: true
+        minicar_4_goalpose:
+          Value: false
+        minicar_5:
+          Value: true
+        minicar_5_goalpose:
+          Value: false
+        minicar_6:
+          Value: true
+        minicar_6_goalpose:
+          Value: false
+        minicar_7:
+          Value: true
+        minicar_7_goalpose:
+          Value: false
+        minicar_8:
+          Value: true
+        minicar_8_goalpose:
+          Value: false
+        minicar_9:
+          Value: true
+        minicar_9_goalpose:
+          Value: false
         mocap:
-          Value: true
+          Value: false
       Marker Scale: 1
       Name: TF
       Show Arrows: true
@@ -64,6 +100,42 @@ Visualization Manager:
           minicar_0:
             {}
           minicar_0_goalpose:
+            {}
+          minicar_1:
+            {}
+          minicar_1_goalpose:
+            {}
+          minicar_2:
+            {}
+          minicar_2_goalpose:
+            {}
+          minicar_3:
+            {}
+          minicar_3_goalpose:
+            {}
+          minicar_4:
+            {}
+          minicar_4_goalpose:
+            {}
+          minicar_5:
+            {}
+          minicar_5_goalpose:
+            {}
+          minicar_6:
+            {}
+          minicar_6_goalpose:
+            {}
+          minicar_7:
+            {}
+          minicar_7_goalpose:
+            {}
+          minicar_8:
+            {}
+          minicar_8_goalpose:
+            {}
+          minicar_9:
+            {}
+          minicar_9_goalpose:
             {}
       Update Interval: 0
       Value: true
@@ -137,7 +209,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 4.522348403930664
+      Distance: 5.731369495391846
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -152,10 +224,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.929796040058136
+      Pitch: 1.0297958850860596
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.26539844274520874
+      Yaw: 0.07539835572242737
     Saved:
       - Class: rviz_default_plugins/Orbit
         Distance: 8.757803916931152
