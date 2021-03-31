@@ -4,13 +4,26 @@ import re
 import numpy as np
 
 from rclpy.node import Node
+from scipy.spatial.transform import Rotation as R
 
 
 class SimpleSimulator(Node):
     def __init__(self, node_name, uuid_regex, robot_class):
         super().__init__(node_name)
+        self.declare_parameter(
+            # Scramble poses to simulate same rigid bodies of multiple agents
+            "unique_rigid_bodies",
+            value="True",
+        )
+
+        unique_rigid_bodies = self.get_parameter("unique_rigid_bodies")._value
+        self.unique_rigid_bodies = (
+            True if unique_rigid_bodies is None else unique_rigid_bodies == "True"
+        )
+
         self.uuid_regex = re.compile(uuid_regex)
         self.robot_class = robot_class
+        self.orientation_offset = R.from_euler("z", 0)
         self.agents = {}
         self.timer_period = 1 / 10  # seconds
         self.pose_publisher_timer = self.create_timer(
@@ -32,12 +45,16 @@ class SimpleSimulator(Node):
         return list(set([t.split("/")[1] for t in agent_topics]))
 
     def discover_agents(self):
-        for agent_key in self.get_all_agents():
+        all_agents = self.get_all_agents()
+        for agent_key in all_agents:
             if agent_key not in self.agents.keys():
                 self.agents[agent_key] = self.robot_class(agent_key, self)
 
     def step_all_agents(self):
-        for agent in self.agents.values():
+        agents_published = list(self.agents.values())
+        if not self.unique_rigid_bodies:
+            np.random.shuffle(agents_published)
+        for agent, agent_publish in zip(self.agents.values(), agents_published):
             agent.step(self.timer_period)
-            agent.publish_pose()
-            agent.publish_tf()
+            agent.publish_pose(agent_publish)
+            agent.publish_tf(agent_publish)
