@@ -53,7 +53,7 @@ class SimulatedRobotBase:
         msg.pose.position.z = agent_pose.position[2]
 
         # This offset is inversing the mocap_offset in tb_control action_server
-        orientation = (agent_pose.orientation * self.node.orientation_offset).as_quat()
+        orientation = (agent_pose.orientation * self.orientation_offset).as_quat()
         msg.pose.orientation.x = orientation[0]
         msg.pose.orientation.y = orientation[1]
         msg.pose.orientation.z = orientation[2]
@@ -78,7 +78,7 @@ class SimulatedRobotBase:
         tf.transform.translation.y = float(agent_pose.position[1])
         tf.transform.translation.z = float(agent_pose.position[2])
         # This offset is inversing the mocap_offset in tb_control action_server
-        orientation = (agent_pose.orientation * self.node.orientation_offset).as_quat()
+        orientation = (agent_pose.orientation * self.orientation_offset).as_quat()
 
         tf.transform.rotation.x = orientation[0]
         tf.transform.rotation.y = orientation[1]

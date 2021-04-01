@@ -13,7 +13,6 @@ class SimpleSimulator(Node):
 
         self.uuid_regex = re.compile(uuid_regex)
         self.robot_class = robot_class
-        self.orientation_offset = R.from_euler("z", 0)
         self.agents = {}
 
         self.declare_parameter(
