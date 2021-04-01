@@ -5,6 +5,7 @@ import numpy as np
 
 from rclpy.node import Node
 from scipy.spatial.transform import Rotation as R
+import time
 
 
 class SimpleSimulator(Node):
@@ -26,12 +27,15 @@ class SimpleSimulator(Node):
             value=-1,
         )
         n_agents = self.get_parameter(f"n_agents")._value
-        self.get_logger().info(f"nagents {n_agents}")
-
         while True:
             all_agents = self.get_all_agents()
+            self.get_logger().info(
+                f"Discovered {len(all_agents)} agents (expecting {n_agents})"
+            )
             if n_agents < 0 or len(all_agents) == n_agents:
                 break
+            self.get_logger().info("Retrying...")
+            time.sleep(1)
 
         for agent_key in all_agents:
             self.declare_parameter(
