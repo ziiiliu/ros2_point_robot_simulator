@@ -13,8 +13,12 @@ class RoboMaster(SimulatedRobotBase):
     MAX_V_LINEAR_Y_M_S = 2.8
     MAX_V_ROT_Z_RAD_S = 10.5
 
-    def __init__(self, uuid, node, initial_position, initial_orientation):
-        super().__init__(uuid, node, initial_position, initial_orientation)
+    def __init__(
+        self, uuid, rigid_body_label, node, initial_position, initial_orientation
+    ):
+        super().__init__(
+            uuid, rigid_body_label, node, initial_position, initial_orientation
+        )
 
         self.velocity = RoboMasterControl()
         self.velocity_subscription = self.node.create_subscription(

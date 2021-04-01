@@ -18,8 +18,12 @@ class CrazyFlie(SimulatedRobotBase):
 
     MAX_V_ROT_Z_RAD_S = 20.0
 
-    def __init__(self, uuid, node, initial_position, initial_orientation):
-        super().__init__(uuid, node, initial_position, initial_orientation)
+    def __init__(
+        self, uuid, rigid_body_label, node, initial_position, initial_orientation
+    ):
+        super().__init__(
+            uuid, rigid_body_label, node, initial_position, initial_orientation
+        )
 
         self.velocity = CrazyflieControl()
         self.velocity_subscription = self.node.create_subscription(

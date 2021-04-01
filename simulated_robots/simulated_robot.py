@@ -8,7 +8,9 @@ from tf2_ros.transform_broadcaster import TransformBroadcaster
 class SimulatedRobotBase:
     WATCHDOG_FREQUENCY_HZ = 5
 
-    def __init__(self, uuid, node, initial_position, initial_orientation):
+    def __init__(
+        self, uuid, rigid_body_label, node, initial_position, initial_orientation
+    ):
         super().__init__()
         assert len(initial_orientation) == 3
         assert len(initial_position) == 3
@@ -18,11 +20,15 @@ class SimulatedRobotBase:
 
         self.node = node
         self.uuid = uuid
+        self.rigid_body_label = rigid_body_label
 
         self.pose_publisher = self.node.create_publisher(
-            PoseStamped, f"/motion_capture_server/rigid_bodies/{self.uuid}/pose", 1
+            PoseStamped,
+            f"/motion_capture_server/rigid_bodies/{self.rigid_body_label}/pose",
+            1,
         )
         self.tf_publisher = TransformBroadcaster(node=self.node)
+        self.orientation_offset = R.from_euler("z", 0)
 
         self.watchdog = None
 
@@ -72,7 +78,7 @@ class SimulatedRobotBase:
         tf = TransformStamped()
         tf.header.frame_id = "mocap"
         tf.header.stamp = self.node.get_clock().now().to_msg()
-        tf.child_frame_id = self.uuid
+        tf.child_frame_id = self.rigid_body_label
 
         tf.transform.translation.x = float(agent_pose.position[0])
         tf.transform.translation.y = float(agent_pose.position[1])
