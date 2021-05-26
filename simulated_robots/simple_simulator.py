@@ -1,12 +1,6 @@
-import rclpy
 import re
-
 import numpy as np
-
 from rclpy.node import Node
-from scipy.spatial.transform import Rotation as R
-import time
-from infrastructure.agent_util import get_uuids
 
 
 class SimpleSimulator(Node):
@@ -27,21 +21,11 @@ class SimpleSimulator(Node):
             "uuids",
             value=[],
         )
-        expected_uuids = self.get_parameter(f"uuids").value
-        assert len(expected_uuids) > 0
-        self.get_logger().info(f"Expect UUIDs {expected_uuids}")
+        uuids = self.get_parameter(f"uuids").value
+        assert len(uuids) > 0
+        self.get_logger().info(f"Create simulation for UUIDs {uuids}")
 
-        while True:
-            self.uuids = get_uuids()
-            self.get_logger().info(
-                f"Discovered {self.uuids} (expecting {expected_uuids})"
-            )
-            if set(self.uuids) == set(expected_uuids):
-                break
-            self.get_logger().info("Retrying...")
-            time.sleep(1)
-
-        for agent_key in self.uuids:
+        for agent_key in uuids:
             self.declare_parameter(
                 f"{agent_key}_initial_position",
                 value=[0.0, 0.0, 0.0],
