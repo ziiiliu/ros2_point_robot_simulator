@@ -7,6 +7,8 @@ from ctrl_msgs.msg import RoboMasterControl
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
 
+from rclpy.qos import qos_profile_sensor_data
+
 
 class RoboMaster(SimulatedRobotBase):
     MAX_V_LINEAR_X_M_S = 3.5
@@ -22,7 +24,10 @@ class RoboMaster(SimulatedRobotBase):
 
         self.velocity = RoboMasterControl()
         self.velocity_subscription = self.node.create_subscription(
-            RoboMasterControl, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
+            RoboMasterControl,
+            f"/{self.uuid}/cmd_vel",
+            self.velocity_callback,
+            qos_profile=qos_profile_sensor_data,
         )
 
     def velocity_callback(self, vel):
