@@ -1,11 +1,11 @@
 import rclpy
+from geometry_msgs.msg import Twist
 import re
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
 from rclpy.node import Node
-from ctrl_msgs.msg import CrazyflieControl
 
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
@@ -25,9 +25,9 @@ class CrazyFlie(SimulatedRobotBase):
             uuid, rigid_body_label, node, initial_position, initial_orientation
         )
 
-        self.velocity = CrazyflieControl()
+        self.velocity = Twist()
         self.velocity_subscription = self.node.create_subscription(
-            CrazyflieControl, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
+            Twist, f"/{self.uuid}/cmd_vel", self.velocity_callback, 1
         )
 
     def velocity_callback(self, vel):
@@ -35,7 +35,7 @@ class CrazyFlie(SimulatedRobotBase):
         self.velocity = vel
 
     def stop(self):
-        self.velocity = CrazyflieControl()
+        self.velocity = Twist()
 
     def step(self, dt):
 

@@ -3,7 +3,7 @@ import rclpy
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from ctrl_msgs.msg import RoboMasterControl
+from geometry_msgs.msg import Twist
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
 
@@ -22,9 +22,9 @@ class RoboMaster(SimulatedRobotBase):
             uuid, rigid_body_label, node, initial_position, initial_orientation
         )
 
-        self.velocity = RoboMasterControl()
+        self.velocity = Twist()
         self.velocity_subscription = self.node.create_subscription(
-            RoboMasterControl,
+            Twist,
             f"/{self.uuid}/cmd_vel",
             self.velocity_callback,
             qos_profile=qos_profile_sensor_data,
@@ -35,19 +35,19 @@ class RoboMaster(SimulatedRobotBase):
         self.velocity = vel
 
     def stop(self):
-        self.velocity = RoboMasterControl()
+        self.velocity = Twist()
 
     def step(self, dt):
         self.position += self.orientation.apply(
             np.array(
                 [
                     np.clip(
-                        self.velocity.vx,
+                        self.velocity.linear.x,
                         -self.MAX_V_LINEAR_X_M_S,
                         self.MAX_V_LINEAR_X_M_S,
                     ),
                     -np.clip(
-                        self.velocity.vy,
+                        self.velocity.linear.y,
                         -self.MAX_V_LINEAR_Y_M_S,
                         self.MAX_V_LINEAR_Y_M_S,
                     ),
@@ -63,7 +63,7 @@ class RoboMaster(SimulatedRobotBase):
                     0,
                     0,
                     np.clip(
-                        -self.velocity.omega,
+                        -self.velocity.angular.z,
                         -self.MAX_V_ROT_Z_RAD_S,
                         self.MAX_V_ROT_Z_RAD_S,
                     ),
