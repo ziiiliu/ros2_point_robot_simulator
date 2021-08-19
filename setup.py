@@ -24,7 +24,6 @@ setup(
             "minicar = simulated_robots.simple_minicar:main",
             "crazyflie = simulated_robots.simple_crazyflie:main",
             "fpvquad = simulated_robots.simple_fpvquad:main",
-
         ],
     },
 )

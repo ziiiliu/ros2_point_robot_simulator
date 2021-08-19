@@ -14,12 +14,12 @@ from rclpy.qos import qos_profile_sensor_data
 
 class FpvQuad(SimulatedRobotBase):
 
-    MAX_V_LINEAR_M_S = 10 * np.array([1.0,1.0,1.0])
-    MAX_A_LINEAR_M_S_S = 10 * np.array([1.0,1.0,1.0])
+    MAX_V_LINEAR_M_S = 10
+    MAX_A_LINEAR_M_S_S = 10
 
     MAX_V_ROT_Z_RAD_S = 1000.0
 
-    drift_vel = 0.5 * np.array([0.0, 0.0, -1.0])
+    # drift_vel = 0.5 * np.array([0.0, 0.0, -1.0])
 
     def __init__(
         self, uuid, rigid_body_label, node, initial_position, initial_orientation
@@ -55,14 +55,19 @@ class FpvQuad(SimulatedRobotBase):
         # simulate drift if desired
         # velocity_array += self.drift_vel
 
-        # acceleration constraint NOTE: constrains each axis separately,
-        #                               not magnitude
-        min_vel = previous_velocity_array - self.MAX_A_LINEAR_M_S_S * dt
-        max_vel = previous_velocity_array + self.MAX_A_LINEAR_M_S_S * dt
-        velocity_array = clip_array(velocity_array, min_vel, max_vel)
+        # acceleration constraint
+        acceleration = (velocity_array - previous_velocity_array) / dt
+        acceleration_mag = np.linalg.norm(acceleration)
+        if acceleration_mag > self.MAX_A_LINEAR_M_S_S:
+            accel_reduction_factor = self.MAX_A_LINEAR_M_S_S / acceleration_mag
+            acceleration *= accel_reduction_factor
+            velocity_array = previous_velocity_array + acceleration * dt
 
-        # absolute velocity constraint NOTE: same as aboce
-        velocity_array = clip_array(velocity_array, -self.MAX_V_LINEAR_M_S, self.MAX_V_LINEAR_M_S)
+        # absolute velocity constraint
+        velocity_mag = np.linalg.norm(velocity_array)
+        if velocity_mag > self.MAX_V_LINEAR_M_S:
+            vel_reduction_factor = self.MAX_V_LINEAR_M_S / velocity_mag
+            velocity_array *= vel_reduction_factor
 
         # update position
         self.position += velocity_array * dt
