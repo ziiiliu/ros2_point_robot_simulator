@@ -1,0 +1,113 @@
+import rclpy
+from geometry_msgs.msg import Twist
+import re
+
+import numpy as np
+from scipy.spatial.transform import Rotation as R
+
+from rclpy.node import Node
+
+from .simulated_robot import SimulatedRobotBase
+from .simple_simulator import SimpleSimulator
+
+from rclpy.qos import qos_profile_sensor_data
+
+class FpvQuad(SimulatedRobotBase):
+
+    MAX_V_LINEAR_M_S = 10 * np.array([1.0,1.0,1.0])
+    MAX_A_LINEAR_M_S_S = 10 * np.array([1.0,1.0,1.0])
+
+    MAX_V_ROT_Z_RAD_S = 1000.0
+
+    drift_vel = 0.5 * np.array([0.0, 0.0, -1.0])
+
+    def __init__(
+        self, uuid, rigid_body_label, node, initial_position, initial_orientation
+    ):
+        super().__init__(
+            uuid, rigid_body_label, node, initial_position, initial_orientation
+        )
+
+        self.velocity = Twist()
+        self.velocity_subscription = self.node.create_subscription(
+            Twist, f"/{self.uuid}/cmd_vel",
+            self.velocity_callback,
+            qos_profile=qos_profile_sensor_data,
+        )
+
+        self.previous_velocity = np.array([0.0,0.0,0.0])
+
+    def velocity_callback(self, vel):
+        self.reset_watchdog()
+        self.velocity = vel
+
+    def stop(self):
+        self.velocity = Twist()
+
+    def step(self, dt):
+
+        # acceleration constraint: ensure velocity does not differ too
+        # much from previous velocity
+
+        velocity_array = twist_to_v(self.velocity)
+        previous_velocity_array = self.previous_velocity # self.prev... NOT stored as twist
+
+        # simulate drift if desired
+        # velocity_array += self.drift_vel
+
+        # acceleration constraint NOTE: constrains each axis separately,
+        #                               not magnitude
+        min_vel = previous_velocity_array - self.MAX_A_LINEAR_M_S_S * dt
+        max_vel = previous_velocity_array + self.MAX_A_LINEAR_M_S_S * dt
+        velocity_array = clip_array(velocity_array, min_vel, max_vel)
+
+        # absolute velocity constraint NOTE: same as aboce
+        velocity_array = clip_array(velocity_array, -self.MAX_V_LINEAR_M_S, self.MAX_V_LINEAR_M_S)
+
+        # update position
+        self.position += velocity_array * dt
+
+        # update previous velocity variable
+        self.previous_velocity = velocity_array
+
+        self.orientation *= R.from_euler(
+            "xyz",
+            np.array(
+                [
+                    0,
+                    0,
+                    np.clip(
+                        -self.velocity.angular.z,
+                        -self.MAX_V_ROT_Z_RAD_S,
+                        self.MAX_V_ROT_Z_RAD_S,
+                    ),
+                ]
+            )
+            * dt,
+        )
+
+def twist_to_v(vel):
+    return np.array([vel.linear.x, vel.linear.y, vel.linear.z])
+
+def clip_array(array_1, array_min, array_max):
+    new_array = (
+        np.array(
+            [
+                np.clip(array_1[0], array_min[0], array_max[0]),
+                np.clip(array_1[1], array_min[1], array_max[1]),
+                np.clip(array_1[2], array_min[2], array_max[2])
+            ]
+        )
+    )
+    return new_array
+
+def main(args=None):
+    rclpy.init(args=args)
+    publisher = SimpleSimulator("simple_fpvquad", r"/fpvquad_\d+/", FpvQuad)
+    rclpy.spin(publisher)
+    publisher.destroy_node()
+    rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
