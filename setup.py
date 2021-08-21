@@ -1,6 +1,6 @@
 from setuptools import setup
 
-package_name = "simulated_robots"
+package_name = "simple_simulator"
 
 setup(
     name=package_name,
@@ -19,11 +19,11 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "robot = simulated_robots.simple_turtlebot:main",
-            "robomaster = simulated_robots.simple_robomaster:main",
-            "minicar = simulated_robots.simple_minicar:main",
-            "crazyflie = simulated_robots.simple_crazyflie:main",
-            "fpvquad = simulated_robots.simple_fpvquad:main",
+            "robot = simple_simulator.simple_turtlebot:main",
+            "robomaster = simple_simulator.simple_robomaster:main",
+            "minicar = simple_simulator.simple_minicar:main",
+            "crazyflie = simple_simulator.simple_crazyflie:main",
+            "fpvquad = simple_simulator.simple_fpvquad:main",
         ],
     },
 )

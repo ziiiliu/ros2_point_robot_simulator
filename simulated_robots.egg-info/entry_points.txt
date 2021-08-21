@@ -1,6 +1,0 @@
-[console_scripts]
-crazyflie = simulated_robots.simple_crazyflie:main
-minicar = simulated_robots.simple_minicar:main
-robomaster = simulated_robots.simple_robomaster:main
-robot = simulated_robots.simple_turtlebot:main
-
