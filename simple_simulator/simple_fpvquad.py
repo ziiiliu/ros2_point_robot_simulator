@@ -1,5 +1,6 @@
 import rclpy
 from geometry_msgs.msg import Twist
+from std_msgs.msg import UInt16MultiArray
 import re
 
 import numpy as np
@@ -37,11 +38,24 @@ class FpvQuad(SimulatedRobotBase):
             qos_profile=qos_profile_sensor_data,
         )
 
+        self.pwm_command = UInt16MultiArray()
+        self.pwm_command.data = [1500, 1500, 1000, 1500]
+        self.pwm_subscription = self.node.create_subscription(
+            UInt16MultiArray,
+            f"/{self.uuid}/pwm",
+            self.pwm_callback,
+            qos_profile=qos_profile_sensor_data,
+        )
+
         self.previous_velocity = np.array([0.0, 0.0, 0.0])
 
     def velocity_callback(self, vel):
         self.reset_watchdog()
         self.velocity = vel
+
+    def pwm_callback(self, pwm):
+        self.reset_watchdog()
+        self.pwm_command = pwm
 
     def stop(self):
         self.velocity = Twist()
@@ -79,21 +93,24 @@ class FpvQuad(SimulatedRobotBase):
         # update previous velocity variable
         self.previous_velocity = velocity_array
 
-        self.orientation *= R.from_euler(
+        # get orientation from pwm command
+        roll_rad = pwm_to_rad(self.pwm_command.data[0])
+        pitch_rad = pwm_to_rad(self.pwm_command.data[1])
+        yaw_rad = pwm_to_rad(self.pwm_command.data[3])
+        self.orientation = R.from_euler(
             "xyz",
             np.array(
                 [
-                    0,
-                    0,
-                    np.clip(
-                        -self.velocity.angular.z,
-                        -self.MAX_V_ROT_Z_RAD_S,
-                        self.MAX_V_ROT_Z_RAD_S,
-                    ),
+                    roll_rad,
+                    pitch_rad,
+                    yaw_rad,
                 ]
-            )
-            * dt,
+            ),
         )
+
+
+def pwm_to_rad(pwm_rotation):
+    return (pwm_rotation - 1500) * np.pi / 1500.
 
 
 def twist_to_v(vel):
