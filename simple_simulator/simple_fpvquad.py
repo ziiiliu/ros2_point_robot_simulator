@@ -101,8 +101,8 @@ class FpvQuad(SimulatedRobotBase):
             "xyz",
             np.array(
                 [
-                    - roll_rad,
-                    - pitch_rad,
+                    roll_rad,
+                    pitch_rad,
                     yaw_rad,
                 ]
             ),
