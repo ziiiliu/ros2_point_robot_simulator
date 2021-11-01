@@ -1,6 +1,10 @@
 import re
 import numpy as np
 from rclpy.node import Node
+from motive_msgs.msg import GlobalPoseStamped
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String
+from rclpy.qos import qos_profile_sensor_data
 
 
 class SimpleSimulator(Node):
@@ -53,16 +57,31 @@ class SimpleSimulator(Node):
 
         self.unique_rigid_bodies = self.get_parameter("unique_rigid_bodies").value
 
-        self.timer_period = 1 / 120  # seconds
+        self.poses_publisher = self.create_publisher(
+            GlobalPoseStamped,
+            f"/motive/poses",
+            qos_profile=qos_profile_sensor_data,
+        )
+
+        self.timer_period = 1 / 30  # seconds
         self.pose_publisher_timer = self.create_timer(
             self.timer_period, self.step_all_agents
         )  # 120 Hz
 
     def step_all_agents(self):
+        poses = GlobalPoseStamped()
+        poses.header.frame_id = "mocap"
+        poses.header.stamp = self.get_clock().now().to_msg()
+
         agents_published = list(self.agents.values())
         if not self.unique_rigid_bodies:
             np.random.shuffle(agents_published)
         for agent, agent_publish in zip(self.agents.values(), agents_published):
             agent.step(self.timer_period)
-            agent.publish_pose(agent_publish)
+            pose = agent.get_ros_pose(agent_publish)
+            poses.poses.append(pose)
+            poses.body_names.append(String(data=agent_publish.rigid_body_label))
+            agent.pose_publisher.publish(PoseStamped(header=poses.header, pose=pose))
             agent.publish_tf(agent_publish)
+
+        self.poses_publisher.publish(poses)

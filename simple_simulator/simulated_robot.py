@@ -1,8 +1,9 @@
 import numpy as np
 
-from geometry_msgs.msg import PoseStamped, TransformStamped
+from geometry_msgs.msg import Pose, PoseStamped, TransformStamped
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
+from rclpy.qos import qos_profile_sensor_data
 
 
 class SimulatedRobotBase:
@@ -24,8 +25,8 @@ class SimulatedRobotBase:
 
         self.pose_publisher = self.node.create_publisher(
             PoseStamped,
-            f"/motion_capture_server/rigid_bodies/{self.rigid_body_label}/pose",
-            1,
+            f"/motive/{self.rigid_body_label}/pose",
+            qos_profile=qos_profile_sensor_data,
         )
         self.tf_publisher = TransformBroadcaster(node=self.node)
         self.orientation_offset = R.from_euler("z", 0)
@@ -48,27 +49,24 @@ class SimulatedRobotBase:
         # Called by watchdog if wasn't reset in time
         raise NotImplementedError()
 
-    def publish_pose(self, agent_pose=None):
+    def get_ros_pose(self, agent_pose=None):
         if agent_pose is None:
             agent_pose = self
 
-        msg = PoseStamped()
+        msg = Pose()
 
-        msg.pose.position.x = agent_pose.position[0]
-        msg.pose.position.y = agent_pose.position[1]
-        msg.pose.position.z = agent_pose.position[2]
+        msg.position.x = agent_pose.position[0]
+        msg.position.y = agent_pose.position[1]
+        msg.position.z = agent_pose.position[2]
 
         # This offset is inversing the mocap_offset in tb_control action_server
         orientation = (agent_pose.orientation * self.orientation_offset).as_quat()
-        msg.pose.orientation.x = orientation[0]
-        msg.pose.orientation.y = orientation[1]
-        msg.pose.orientation.z = orientation[2]
-        msg.pose.orientation.w = orientation[3]
+        msg.orientation.x = orientation[0]
+        msg.orientation.y = orientation[1]
+        msg.orientation.z = orientation[2]
+        msg.orientation.w = orientation[3]
 
-        msg.header.frame_id = "mocap"
-        msg.header.stamp = self.node.get_clock().now().to_msg()
-
-        self.pose_publisher.publish(msg)
+        return msg
 
     def publish_tf(self, agent_pose=None):
         if agent_pose is None:
