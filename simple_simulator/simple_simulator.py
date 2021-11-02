@@ -1,8 +1,8 @@
 import re
 import numpy as np
 from rclpy.node import Node
-from motive_msgs.msg import GlobalPoseStamped
-from geometry_msgs.msg import PoseStamped
+from motive_msgs.msg import GlobalStateStamped
+from geometry_msgs.msg import PoseStamped, TwistStamped
 from std_msgs.msg import String
 from rclpy.qos import qos_profile_sensor_data
 
@@ -14,12 +14,6 @@ class SimpleSimulator(Node):
         self.uuid_regex = re.compile(uuid_regex)
         self.robot_class = robot_class
         self.agents = {}
-
-        self.declare_parameter(
-            # Scramble poses to simulate same rigid bodies of multiple agents
-            "unique_rigid_bodies",
-            value=True,
-        )
 
         self.declare_parameter(
             "uuids",
@@ -55,11 +49,9 @@ class SimpleSimulator(Node):
                 agent_key, rigid_body_label, self, initial_pos, initial_orientation
             )
 
-        self.unique_rigid_bodies = self.get_parameter("unique_rigid_bodies").value
-
-        self.poses_publisher = self.create_publisher(
-            GlobalPoseStamped,
-            f"/motive/poses",
+        self.global_state_publisher = self.create_publisher(
+            GlobalStateStamped,
+            f"/motive/state",
             qos_profile=qos_profile_sensor_data,
         )
 
@@ -69,19 +61,27 @@ class SimpleSimulator(Node):
         )  # 120 Hz
 
     def step_all_agents(self):
-        poses = GlobalPoseStamped()
-        poses.header.frame_id = "mocap"
-        poses.header.stamp = self.get_clock().now().to_msg()
+        global_state = GlobalStateStamped()
+        global_state.header.frame_id = "mocap"
+        global_state.header.stamp = self.get_clock().now().to_msg()
 
-        agents_published = list(self.agents.values())
-        if not self.unique_rigid_bodies:
-            np.random.shuffle(agents_published)
-        for agent, agent_publish in zip(self.agents.values(), agents_published):
+        for agent in self.agents.values():
             agent.step(self.timer_period)
-            pose = agent.get_ros_pose(agent_publish)
-            poses.poses.append(pose)
-            poses.body_names.append(String(data=agent_publish.rigid_body_label))
-            agent.pose_publisher.publish(PoseStamped(header=poses.header, pose=pose))
-            agent.publish_tf(agent_publish)
+            agent.update_velocity(self.timer_period)
 
-        self.poses_publisher.publish(poses)
+            pose = agent.get_ros_pose()
+            global_state.poses.append(pose)
+            vel = agent.get_ros_vel()
+            global_state.velocities.append(vel)
+
+            agent.pose_publisher.publish(
+                PoseStamped(header=global_state.header, pose=pose)
+            )
+            agent.vel_publisher.publish(
+                TwistStamped(header=global_state.header, twist=vel)
+            )
+            agent.publish_tf(agent)
+
+            global_state.body_names.append(String(data=agent.rigid_body_label))
+
+        self.global_state_publisher.publish(global_state)
