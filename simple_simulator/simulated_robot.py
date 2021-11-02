@@ -2,6 +2,7 @@ import numpy as np
 import copy
 
 from geometry_msgs.msg import Pose, PoseStamped, Twist, TwistStamped, TransformStamped
+from ctrl_msgs.srv import EmergencyStop
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 from rclpy.qos import qos_profile_sensor_data
@@ -36,10 +37,21 @@ class SimulatedRobotBase:
         self.vel_publisher = self.node.create_publisher(
             TwistStamped, f"/motive/{uuid}/vel", qos_profile=qos_profile_sensor_data
         )
+        self.emergency_stop_srv = self.node.create_service(
+            EmergencyStop, f"/{self.rigid_body_label}/emergency_stop", self.emergency_stop
+        )
+
         self.tf_publisher = TransformBroadcaster(node=self.node)
         self.orientation_offset = R.from_euler("z", 0)
 
         self.watchdog = None
+        self.stopped = False
+
+    def emergency_stop(self, req, resp):
+        self.node.get_logger().debug(f"Received emergency stop request {req}")
+        self.stopped = req.stop
+        resp.success = True
+        return resp
 
     def reset_watchdog(self):
         # Reset the watchdog. The watchdog only starts running after it was reset once.

@@ -38,6 +38,10 @@ class RoboMaster(SimulatedRobotBase):
         self.velocity = Twist()
 
     def step(self, dt):
+        if self.stopped:
+            self.stop()
+            return
+
         self.position += self.orientation.apply(
             np.array(
                 [
