@@ -2,7 +2,7 @@ import numpy as np
 import copy
 
 from geometry_msgs.msg import Pose, PoseStamped, Twist, TwistStamped, TransformStamped
-from ctrl_msgs.srv import EmergencyStop
+from emergency_stop_msgs.srv import EmergencyStop
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 from rclpy.qos import qos_profile_sensor_data
