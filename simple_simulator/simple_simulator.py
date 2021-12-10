@@ -1,10 +1,7 @@
 import re
-import numpy as np
 from rclpy.node import Node
-from motive_msgs.msg import GlobalStateStamped
 from geometry_msgs.msg import PoseStamped, TwistStamped
 from std_msgs.msg import String
-from rclpy.qos import qos_profile_sensor_data
 
 
 class SimpleSimulator(Node):
@@ -49,39 +46,12 @@ class SimpleSimulator(Node):
                 agent_key, rigid_body_label, self, initial_pos, initial_orientation
             )
 
-        self.global_state_publisher = self.create_publisher(
-            GlobalStateStamped,
-            f"/motive/state",
-            qos_profile=qos_profile_sensor_data,
-        )
-
         self.timer_period = 1 / 30  # seconds
         self.pose_publisher_timer = self.create_timer(
             self.timer_period, self.step_all_agents
         )  # 120 Hz
 
     def step_all_agents(self):
-        global_state = GlobalStateStamped()
-        global_state.header.frame_id = "mocap"
-        global_state.header.stamp = self.get_clock().now().to_msg()
-
         for agent in self.agents.values():
             agent.step(self.timer_period)
-            agent.update_velocity(self.timer_period)
-
-            pose = agent.get_ros_pose()
-            global_state.poses.append(pose)
-            vel = agent.get_ros_vel()
-            global_state.velocities.append(vel)
-
-            agent.pose_publisher.publish(
-                PoseStamped(header=global_state.header, pose=pose)
-            )
-            agent.vel_publisher.publish(
-                TwistStamped(header=global_state.header, twist=vel)
-            )
-            agent.publish_tf(agent)
-
-            global_state.body_names.append(String(data=agent.rigid_body_label))
-
-        self.global_state_publisher.publish(global_state)
+            agent.publish_tf()
