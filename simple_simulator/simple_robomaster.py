@@ -6,6 +6,7 @@ from scipy.spatial.transform import Rotation as R
 from geometry_msgs.msg import Twist
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
+from robomaster_msgs.msg import WheelSpeed
 
 from rclpy.qos import qos_profile_sensor_data
 
@@ -29,6 +30,38 @@ class RoboMaster(SimulatedRobotBase):
             self.velocity_callback,
             qos_profile=qos_profile_sensor_data,
         )
+        self.wheelspeed_subscription = self.node.create_subscription(
+            WheelSpeed,
+            f"/{self.uuid}/cmd_wheels",
+            self.wheelspeed_callback,
+            qos_profile=qos_profile_sensor_data,
+        )
+
+    def wheelspeed_callback(self, wheels):
+        self.reset_watchdog()
+
+        # https://research.ijcaonline.org/volume113/number3/pxc3901586.pdf
+        ws_rpm = np.array([wheels.fl, wheels.fr, wheels.rl, wheels.rr])
+        ws = ws_rpm / 60 * 2 * np.pi
+        lx = 0.15
+        ly = 0.15
+        r = 0.06
+        t_plus = (
+            r
+            / 4
+            * np.array(
+                [
+                    [1, 1, 1, 1],
+                    [-1, 1, 1, -1],
+                    [-1 / (lx + ly), 1 / (lx + ly), -1 / (lx + ly), 1 / (lx + ly)],
+                ]
+            )
+        )
+        v = t_plus @ ws
+
+        self.velocity.linear.x = v[0]
+        self.velocity.linear.y = v[1]
+        self.velocity.angular.z = v[2]
 
     def velocity_callback(self, vel):
         self.reset_watchdog()
