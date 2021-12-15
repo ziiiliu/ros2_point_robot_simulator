@@ -42,6 +42,7 @@ class RoboMaster(SimulatedRobotBase):
 
         # https://research.ijcaonline.org/volume113/number3/pxc3901586.pdf
         ws_rpm = np.array([wheels.fl, wheels.fr, wheels.rl, wheels.rr])
+        ws_rpm[np.abs(ws_rpm) < 13] = 0.0  # Robot RPM dead band
         ws = ws_rpm / 60 * 2 * np.pi
         lx = 0.15
         ly = 0.15
