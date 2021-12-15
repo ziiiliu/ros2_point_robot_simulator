@@ -61,8 +61,8 @@ class RoboMaster(SimulatedRobotBase):
         v = t_plus @ ws
 
         self.velocity.linear.x = v[0]
-        self.velocity.linear.y = v[1]
-        self.velocity.angular.z = v[2]
+        self.velocity.linear.y = -v[1]
+        self.velocity.angular.z = -v[2]
 
     def velocity_callback(self, vel):
         self.reset_watchdog()
