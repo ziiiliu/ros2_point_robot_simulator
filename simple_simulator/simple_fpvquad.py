@@ -1,7 +1,7 @@
 import rclpy
 from geometry_msgs.msg import Twist
-from std_msgs.msg import UInt16MultiArray
-import re
+from freyja_msgs.msg import CtrlCommand
+from geometry_msgs.msg import TransformStamped
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
@@ -15,14 +15,6 @@ from rclpy.qos import qos_profile_sensor_data
 
 
 class FpvQuad(SimulatedRobotBase):
-
-    MAX_V_LINEAR_M_S = 10
-    MAX_A_LINEAR_M_S_S = 10
-
-    MAX_V_ROT_Z_RAD_S = 1000.0
-
-    # drift_vel = 0.5 * np.array([0.0, 0.0, -1.0])
-
     def __init__(
         self, uuid, rigid_body_label, node, initial_position, initial_orientation
     ):
@@ -30,87 +22,78 @@ class FpvQuad(SimulatedRobotBase):
             uuid, rigid_body_label, node, initial_position, initial_orientation
         )
 
-        self.velocity = Twist()
-        self.velocity_subscription = self.node.create_subscription(
-            Twist,
-            f"/{self.uuid}/cmd_vel",
-            self.velocity_callback,
+        self.control = CtrlCommand()
+        self.v_ned = np.zeros(3)
+        self.a_ned = np.zeros(3)
+        self.control_subscription = self.node.create_subscription(
+            CtrlCommand,
+            f"/{self.uuid}/rpyt_command",
+            self.control_callback,
             qos_profile=qos_profile_sensor_data,
         )
 
-        self.pwm_command = UInt16MultiArray()
-        self.pwm_command.data = [1500, 1500, 1000, 1500]
-        self.pwm_subscription = self.node.create_subscription(
-            UInt16MultiArray,
-            f"/{self.uuid}/pwm",
-            self.pwm_callback,
-            qos_profile=qos_profile_sensor_data,
-        )
-
-        self.previous_velocity = np.array([0.0, 0.0, 0.0])
-
-    def velocity_callback(self, vel):
+    def control_callback(self, control: CtrlCommand):
         self.reset_watchdog()
-        self.velocity = vel
-
-    def pwm_callback(self, pwm):
-        self.reset_watchdog()
-        self.pwm_command = pwm
+        self.control = control
 
     def stop(self):
-        self.velocity = Twist()
+        self.control = CtrlCommand()
 
     def step(self, dt):
-
-        # acceleration constraint: ensure velocity does not differ too
-        # much from previous velocity
-
-        velocity_array = twist_to_v(self.velocity)
-        previous_velocity_array = (
-            self.previous_velocity
-        )  # self.prev... NOT stored as twist
-
-        # simulate drift if desired
-        # velocity_array += self.drift_vel
-
-        # acceleration constraint - needs to be absolute magnitude, not axis-wise
-        acceleration = (velocity_array - previous_velocity_array) / dt
-        acceleration_mag = np.linalg.norm(acceleration)
-        if acceleration_mag > self.MAX_A_LINEAR_M_S_S:
-            accel_reduction_factor = self.MAX_A_LINEAR_M_S_S / acceleration_mag
-            acceleration *= accel_reduction_factor
-            velocity_array = previous_velocity_array + acceleration * dt
-
-        # absolute velocity constraint - same as above
-        velocity_mag = np.linalg.norm(velocity_array)
-        if velocity_mag > self.MAX_V_LINEAR_M_S:
-            vel_reduction_factor = self.MAX_V_LINEAR_M_S / velocity_mag
-            velocity_array *= vel_reduction_factor
-
-        # update position
-        self.position += velocity_array * dt
-
-        # update previous velocity variable
-        self.previous_velocity = velocity_array
-
-        # get orientation from pwm command
-        roll_rad = pwm_to_rad(self.pwm_command.data[0])
-        pitch_rad = pwm_to_rad(self.pwm_command.data[1])
-        yaw_rad = pwm_to_rad(self.pwm_command.data[3])
         self.orientation = R.from_euler(
             "xyz",
             np.array(
                 [
-                    roll_rad,
-                    pitch_rad,
-                    yaw_rad,
+                    self.control.roll,
+                    self.control.pitch,
+                    self.orientation.as_euler("xyz")[2] + self.control.yaw * dt,
                 ]
             ),
         )
 
+        roll = self.control.roll
+        pitch = self.control.pitch
+        _, _, yaw = self.orientation.as_euler("xyz")
+
+        rot_force = np.array(
+            [
+                np.cos(roll) * np.sin(pitch) * np.cos(yaw) + np.sin(roll) * np.sin(yaw),
+                np.cos(roll) * np.sin(pitch) * np.sin(yaw) - np.sin(roll) * np.cos(yaw),
+                np.cos(roll) * np.cos(pitch),
+            ]
+        )
+        m = 0.85  # kg
+        g = 9.81  # m/s^2
+        f_ned = -rot_force * self.control.thrust + [0, 0, m * g]
+        self.a_ned = f_ned / m
+        self.v_ned += self.a_ned * dt
+        self.position += self.v_ned * dt
+        self.node.get_logger().info(f"Pos {self.position}")
+        if self.position[2] > 0.0:
+            self.v_ned = np.zeros(3)
+            self.position[2] = 0.0
+
+    def publish_tf(self):
+        tf = TransformStamped()
+        tf.header.frame_id = "map"
+        tf.header.stamp = self.node.get_clock().now().to_msg()
+        tf.child_frame_id = self.rigid_body_label
+
+        tf.transform.translation.x = self.position[1]
+        tf.transform.translation.y = self.position[0]
+        tf.transform.translation.z = -self.position[2]
+
+        orientation = self.orientation.as_quat()
+        tf.transform.rotation.x = orientation[0]
+        tf.transform.rotation.y = orientation[1]
+        tf.transform.rotation.z = orientation[2]
+        tf.transform.rotation.w = orientation[3]
+
+        self.tf_publisher.sendTransform(tf)
+
 
 def pwm_to_rad(pwm_rotation):
-    return (pwm_rotation - 1500) * np.pi / 1500.
+    return (pwm_rotation - 1500) * np.pi / 1500.0
 
 
 def twist_to_v(vel):
