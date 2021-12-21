@@ -50,7 +50,7 @@ class FpvQuad(SimulatedRobotBase):
                 ]
             ),
         )
-
+        #self.node.get_logger().info( f"Orientation: {self.orientation}" );
         roll = self.control.roll
         pitch = self.control.pitch
         _, _, yaw = self.orientation.as_euler("xyz")
@@ -75,13 +75,13 @@ class FpvQuad(SimulatedRobotBase):
 
     def publish_tf(self):
         tf = TransformStamped()
-        tf.header.frame_id = "map"
+        tf.header.frame_id = "map_ned"
         tf.header.stamp = self.node.get_clock().now().to_msg()
         tf.child_frame_id = self.rigid_body_label
 
-        tf.transform.translation.x = self.position[1]
-        tf.transform.translation.y = self.position[0]
-        tf.transform.translation.z = -self.position[2]
+        tf.transform.translation.x = self.position[0]
+        tf.transform.translation.y = self.position[1]
+        tf.transform.translation.z = self.position[2]
 
         orientation = self.orientation.as_quat()
         tf.transform.rotation.x = orientation[0]

@@ -14,7 +14,7 @@ class SimpleSimulator(Node):
 
         self.declare_parameter(
             "uuids",
-            value=[],
+            value=None, #value=[""], #value=[],
         )
         uuids = self.get_parameter(f"uuids").value
         assert len(uuids) > 0
@@ -46,7 +46,7 @@ class SimpleSimulator(Node):
                 agent_key, rigid_body_label, self, initial_pos, initial_orientation
             )
 
-        self.timer_period = 1 / 30  # seconds
+        self.timer_period = 1 / 200  # seconds
         self.pose_publisher_timer = self.create_timer(
             self.timer_period, self.step_all_agents
         )  # 120 Hz
