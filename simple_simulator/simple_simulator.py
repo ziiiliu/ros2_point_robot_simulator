@@ -14,7 +14,7 @@ class SimpleSimulator(Node):
 
         self.declare_parameter(
             "uuids",
-            value=None, #value=[""], #value=[],
+            value=None,  # value=[""], #value=[],
         )
         uuids = self.get_parameter(f"uuids").value
         assert len(uuids) > 0

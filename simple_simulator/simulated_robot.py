@@ -58,7 +58,7 @@ class SimulatedRobotBase:
 
     def publish_tf(self):
         tf = TransformStamped()
-        tf.header.frame_id = "map"
+        tf.header.frame_id = "map_ned"
         tf.header.stamp = self.node.get_clock().now().to_msg()
         tf.child_frame_id = self.rigid_body_label
 

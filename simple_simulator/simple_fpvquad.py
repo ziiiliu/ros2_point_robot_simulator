@@ -1,17 +1,10 @@
-import rclpy
-from geometry_msgs.msg import Twist
-from freyja_msgs.msg import CtrlCommand
-from geometry_msgs.msg import TransformStamped
-
 import numpy as np
 from scipy.spatial.transform import Rotation as R
-
-from rclpy.node import Node
-
+import rclpy
+from rclpy.qos import qos_profile_sensor_data
+from freyja_msgs.msg import CtrlCommand
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
-
-from rclpy.qos import qos_profile_sensor_data
 
 
 class FpvQuad(SimulatedRobotBase):
@@ -50,7 +43,6 @@ class FpvQuad(SimulatedRobotBase):
                 ]
             ),
         )
-        #self.node.get_logger().info( f"Orientation: {self.orientation}" );
         roll = self.control.roll
         pitch = self.control.pitch
         _, _, yaw = self.orientation.as_euler("xyz")
@@ -68,47 +60,9 @@ class FpvQuad(SimulatedRobotBase):
         self.a_ned = f_ned / m
         self.v_ned += self.a_ned * dt
         self.position += self.v_ned * dt
-        self.node.get_logger().info(f"Pos {self.position}")
         if self.position[2] > 0.0:
             self.v_ned = np.zeros(3)
             self.position[2] = 0.0
-
-    def publish_tf(self):
-        tf = TransformStamped()
-        tf.header.frame_id = "map_ned"
-        tf.header.stamp = self.node.get_clock().now().to_msg()
-        tf.child_frame_id = self.rigid_body_label
-
-        tf.transform.translation.x = self.position[0]
-        tf.transform.translation.y = self.position[1]
-        tf.transform.translation.z = self.position[2]
-
-        orientation = self.orientation.as_quat()
-        tf.transform.rotation.x = orientation[0]
-        tf.transform.rotation.y = orientation[1]
-        tf.transform.rotation.z = orientation[2]
-        tf.transform.rotation.w = orientation[3]
-
-        self.tf_publisher.sendTransform(tf)
-
-
-def pwm_to_rad(pwm_rotation):
-    return (pwm_rotation - 1500) * np.pi / 1500.0
-
-
-def twist_to_v(vel):
-    return np.array([vel.linear.x, vel.linear.y, vel.linear.z])
-
-
-def clip_array(array_1, array_min, array_max):
-    new_array = np.array(
-        [
-            np.clip(array_1[0], array_min[0], array_max[0]),
-            np.clip(array_1[1], array_min[1], array_max[1]),
-            np.clip(array_1[2], array_min[2], array_max[2]),
-        ]
-    )
-    return new_array
 
 
 def main(args=None):
