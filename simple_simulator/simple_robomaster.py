@@ -3,7 +3,7 @@ import rclpy
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, TransformStamped
 from .simulated_robot import SimulatedRobotBase
 from .simple_simulator import SimpleSimulator
 from robomaster_msgs.msg import WheelSpeed
@@ -119,6 +119,24 @@ class RoboMaster(SimulatedRobotBase):
             )
             * dt,
         )
+
+    def publish_tf(self):
+        tf = TransformStamped()
+        tf.header.frame_id = "map"
+        tf.header.stamp = self.node.get_clock().now().to_msg()
+        tf.child_frame_id = self.rigid_body_label
+
+        tf.transform.translation.x = self.position[0]
+        tf.transform.translation.y = self.position[1]
+        tf.transform.translation.z = self.position[2]
+
+        orientation = self.orientation.as_quat()
+        tf.transform.rotation.x = orientation[0]
+        tf.transform.rotation.y = orientation[1]
+        tf.transform.rotation.z = orientation[2]
+        tf.transform.rotation.w = orientation[3]
+
+        self.tf_publisher.sendTransform(tf)
 
 
 def main(args=None):
