@@ -1,7 +1,7 @@
 import numpy as np
 
 from geometry_msgs.msg import TransformStamped
-from emergency_stop_msgs.srv import EmergencyStop
+from std_msgs.srv import SetBool
 from scipy.spatial.transform import Rotation as R
 from tf2_ros.transform_broadcaster import TransformBroadcaster
 
@@ -24,7 +24,7 @@ class SimulatedRobotBase:
         self.rigid_body_label = rigid_body_label
 
         self.emergency_stop_srv = self.node.create_service(
-            EmergencyStop,
+            SetBool,
             f"/{self.rigid_body_label}/emergency_stop",
             self.emergency_stop,
         )
@@ -36,7 +36,7 @@ class SimulatedRobotBase:
 
     def emergency_stop(self, req, resp):
         self.node.get_logger().debug(f"Received emergency stop request {req}")
-        self.stopped = req.stop
+        self.stopped = req.data
         resp.success = True
         return resp
 
